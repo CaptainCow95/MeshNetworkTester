@@ -14,10 +14,12 @@ namespace MeshNetworkTester
             string servers = Console.ReadLine();
             MeshNetwork.NetworkNode node = new MeshNetwork.NetworkNode("MeshNetworkTester" + port + ".log");
             node.ConnectToNetwork(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new MeshNetwork.NodeProperties(e)));
+
+            MeshNetwork.NodeProperties thisMachine = new MeshNetwork.NodeProperties("127.0.0.1", port);
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("Running on port: " + port);
+                Console.WriteLine("Currently running on " + thisMachine.IP.ToString() + ":" + thisMachine.Port.ToString());
                 Console.WriteLine();
                 Console.WriteLine("Connected Nodes:");
                 foreach (var neighbor in node.GetNeighbors())
