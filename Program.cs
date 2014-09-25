@@ -16,7 +16,7 @@ namespace MeshNetworkTester
             NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log");
             node.ConnectToNetwork(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)));
 
-            var thisMachine = new NodeProperties("127.0.0.1", port);
+            var thisMachine = new NodeProperties("localhost", port);
             while (true)
             {
                 Console.Clear();
