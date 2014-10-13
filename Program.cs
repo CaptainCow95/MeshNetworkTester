@@ -24,7 +24,7 @@ namespace MeshNetworkTester
                 servers = Console.ReadLine();
             }
 
-            NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log");
+            NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log", LogLevels.Info);
             node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
             var thisMachine = new NodeProperties("localhost", port);
