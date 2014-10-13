@@ -25,6 +25,7 @@ namespace MeshNetworkTester
             }
 
             NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log", LogLevels.Info);
+            node.ReconnectionFrequency = 5;
             node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
             var thisMachine = new NodeProperties("localhost", port);
