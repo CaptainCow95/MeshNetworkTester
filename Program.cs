@@ -7,28 +7,41 @@ namespace MeshNetworkTester
 {
     public static class Program
     {
-        private static void Main()
+        private static void Main(String[] args)
         {
-            Console.Write("Input a port to run on: ");
-            int port = int.Parse(Console.ReadLine());
-            Console.Write("Input a comma separated list of servers to connect to: ");
-            string servers = Console.ReadLine();
+            int port;
+            string servers;
+            if (args.Length == 2)
+            {
+                port = int.Parse(args[0]);
+                servers = args[1];
+            }
+            else
+            {
+                Console.Write("Input a port to run on: ");
+                port = int.Parse(Console.ReadLine());
+                Console.Write("Input a comma separated list of servers to connect to: ");
+                servers = Console.ReadLine();
+            }
+
             NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log");
-            node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)));
+            node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
             var thisMachine = new NodeProperties("localhost", port);
+
             while (true)
             {
                 Console.Clear();
                 Console.WriteLine("Currently running on " + thisMachine.IpAddress + ":" + thisMachine.Port);
                 Console.WriteLine();
-                Console.WriteLine("Connected Nodes:");
-                foreach (var neighbor in node.GetNeighbors())
+                var neighbors = node.GetNeighbors();
+                Console.WriteLine("Connected Nodes: " + neighbors.Count);
+                foreach (var neighbor in neighbors)
                 {
                     Console.WriteLine(neighbor.IpAddress + ":" + neighbor.Port);
                 }
 
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
             }
         }
     }
