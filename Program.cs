@@ -1,7 +1,6 @@
 ﻿using MeshNetwork;
 using System;
 using System.Linq;
-using System.Threading;
 
 namespace MeshNetworkTester
 {
@@ -25,7 +24,6 @@ namespace MeshNetworkTester
             }
 
             NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log", LogLevels.Info);
-            node.ReconnectionFrequency = 5;
             node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
             var thisMachine = new NodeProperties("localhost", port);
@@ -36,13 +34,15 @@ namespace MeshNetworkTester
                 Console.WriteLine("Currently running on " + thisMachine.IpAddress + ":" + thisMachine.Port);
                 Console.WriteLine();
                 var neighbors = node.GetNeighbors();
-                Console.WriteLine("Connected Nodes: " + neighbors.Count);
+                Console.WriteLine("Connected Nodes: ");
                 foreach (var neighbor in neighbors)
                 {
                     Console.WriteLine(neighbor.IpAddress + ":" + neighbor.Port);
                 }
 
-                Thread.Sleep(1000);
+                Console.WriteLine("Currently connected to " + neighbors.Count + " nodes.");
+                Console.WriteLine("Press enter to update.");
+                Console.ReadLine();
             }
         }
     }
