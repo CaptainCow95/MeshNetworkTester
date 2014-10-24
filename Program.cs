@@ -1,32 +1,43 @@
 ﻿using MeshNetwork;
 using System;
+using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace MeshNetworkTester
 {
     public static class Program
     {
+        private static int _port;
+
+        private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            Exception e = (Exception)unhandledExceptionEventArgs.ExceptionObject;
+            File.AppendAllText("error" + _port + ".txt", e.Message + "\n" + e.StackTrace);
+        }
+
         private static void Main(String[] args)
         {
-            int port;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+
             string servers;
             if (args.Length == 2)
             {
-                port = int.Parse(args[0]);
+                _port = int.Parse(args[0]);
                 servers = args[1];
             }
             else
             {
                 Console.Write("Input a port to run on: ");
-                port = int.Parse(Console.ReadLine());
+                _port = int.Parse(Console.ReadLine());
                 Console.Write("Input a comma separated list of servers to connect to: ");
                 servers = Console.ReadLine();
             }
 
-            NetworkNode node = new NetworkNode("MeshNetworkTester" + port + ".log", LogLevels.Info);
-            node.ConnectToNetworkAsync(port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
+            MeshNetworkNode node = new MeshNetworkNode("MeshNetworkTester" + _port + ".log", LogLevels.Debug);
+            node.ConnectToNetwork(_port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
-            var thisMachine = new NodeProperties("localhost", port);
+            var thisMachine = new NodeProperties("localhost", _port);
 
             while (true)
             {
@@ -38,11 +49,13 @@ namespace MeshNetworkTester
                 foreach (var neighbor in neighbors)
                 {
                     Console.WriteLine(neighbor.IpAddress + ":" + neighbor.Port);
+
+                    //node.SendMessage(neighbor, "hi");
                 }
 
                 Console.WriteLine("Currently connected to " + neighbors.Count + " nodes.");
-                Console.WriteLine("Press enter to update.");
-                Console.ReadLine();
+
+                Thread.Sleep(1000);
             }
         }
     }
