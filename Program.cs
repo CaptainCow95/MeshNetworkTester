@@ -8,6 +8,7 @@ namespace MeshNetworkTester
 {
     public static class Program
     {
+        private static bool _mesh;
         private static int _port;
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
@@ -21,10 +22,11 @@ namespace MeshNetworkTester
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
             string servers;
-            if (args.Length == 2)
+            if (args.Length == 3)
             {
                 _port = int.Parse(args[0]);
                 servers = args[1];
+                _mesh = bool.Parse(args[2]);
             }
             else
             {
@@ -32,9 +34,21 @@ namespace MeshNetworkTester
                 _port = int.Parse(Console.ReadLine());
                 Console.Write("Input a comma separated list of servers to connect to: ");
                 servers = Console.ReadLine();
+                Console.Write("Is this a mesh network? (true for yes, false for chord network): ");
+                _mesh = bool.Parse(Console.ReadLine());
             }
 
-            MeshNetworkNode node = new MeshNetworkNode("MeshNetworkTester" + _port + ".log", LogLevels.Debug);
+            NetworkNode node;
+            if (_mesh)
+            {
+                node = new MeshNetworkNode("MeshNetworkTester" + _port + ".log", LogLevels.Warning);
+            }
+            else
+            {
+                node = new ChordNetworkNode("MeshNetworkTester" + _port + ".log", LogLevels.Warning);
+                node.UpdateNetworkFrequency = 1;
+            }
+
             node.ConnectToNetwork(_port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
 
             var thisMachine = new NodeProperties("localhost", _port);
@@ -44,18 +58,30 @@ namespace MeshNetworkTester
                 Console.Clear();
                 Console.WriteLine("Currently running on " + thisMachine.IpAddress + ":" + thisMachine.Port);
                 Console.WriteLine();
-                var neighbors = node.GetNeighbors();
-                Console.WriteLine("Connected Nodes: ");
-                foreach (var neighbor in neighbors)
+                if (_mesh)
                 {
-                    Console.WriteLine(neighbor.IpAddress + ":" + neighbor.Port);
+                    var neighbors = node.GetNeighbors();
+                    Console.WriteLine("Connected Nodes: ");
+                    foreach (var neighbor in neighbors)
+                    {
+                        Console.WriteLine(neighbor.IpAddress + ":" + neighbor.Port);
+                    }
 
-                    //node.SendMessage(neighbor, "hi");
+                    Console.WriteLine("Currently connected to " + neighbors.Count + " nodes.");
+                }
+                else
+                {
+                    var chordNode = (ChordNetworkNode)node;
+                    Console.WriteLine("Predecessor: " + chordNode.Predecessor);
+                    Console.WriteLine("Successor: " + (chordNode.Successor == null ? "self" : chordNode.Successor.ToString()));
                 }
 
-                Console.WriteLine("Currently connected to " + neighbors.Count + " nodes.");
+                foreach (var neighbor in node.GetNeighbors())
+                {
+                    node.SendMessage(neighbor, "Flush");
+                }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
         }
     }
