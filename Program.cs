@@ -46,7 +46,7 @@ namespace MeshNetworkTester
             else
             {
                 node = new ChordNetworkNode("MeshNetworkTester" + _port + ".log", LogLevels.Warning);
-                node.UpdateNetworkFrequency = 1;
+                node.UpdateNetworkFrequency = 30;
             }
 
             node.ConnectToNetwork(_port, servers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(e => new NodeProperties(e)).ToList());
@@ -72,8 +72,12 @@ namespace MeshNetworkTester
                 else
                 {
                     var chordNode = (ChordNetworkNode)node;
-                    Console.WriteLine("Predecessor: " + chordNode.Predecessor);
-                    Console.WriteLine("Successor: " + (chordNode.Successor == null ? "self" : chordNode.Successor.ToString()));
+                    Console.WriteLine("id: " + chordNode.Id + " Predecessor: " + chordNode.Predecessor + " Successor: " + (chordNode.Successor == null ? "self" : chordNode.Successor.ToString()));
+                    Console.WriteLine("Fingers:");
+                    foreach (var finger in chordNode.GetFingers())
+                    {
+                        Console.WriteLine(finger.IpAddress + ":" + finger.Port);
+                    }
                 }
 
                 foreach (var neighbor in node.GetNeighbors())
