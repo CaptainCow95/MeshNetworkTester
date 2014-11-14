@@ -77,6 +77,13 @@ namespace MeshNetworkTester
 
                 switch (command)
                 {
+                    case "custom":
+                        Console.WriteLine("Node to send data to: ");
+                        string node = Console.ReadLine();
+                        Console.WriteLine("Data to send: ");
+                        string data = Console.ReadLine();
+                        _node.SendMessage(new NodeProperties(node), data);
+                        break;
                     case "exit":
                         Console.WriteLine("Shutting down node...");
                         running = false;
@@ -84,7 +91,7 @@ namespace MeshNetworkTester
                         break;
 
                     case "help":
-                        Console.WriteLine("exit: Exits the program\nstatus: Displays the status of the program\nread: Reads a value from the database\nwrite: Writes a value to the database");
+                        Console.WriteLine("exit: Exits the program\nstatus: Displays the status of the program\nread: Reads a value from the database\nwrite: Writes a value to the database\ncustom: Sends a custom message (warning: this will also output the message on the receiver's side immediately upon receiving it)");
                         break;
 
                     case "read":
@@ -229,6 +236,10 @@ namespace MeshNetworkTester
                 {
                     _node.SendResponse(args.Message, "n");
                 }
+            }
+            else if(args.Message.InResponseToMessage == false)
+            {
+                Console.WriteLine(args.Message.Data);
             }
         }
 
